@@ -1,7 +1,7 @@
 ## BoardgameListingWebApp
 
-## Descriptionxxb
-##hi
+## Description
+
 #hello thus is uodate
 ##wweersdfggh
 **Board Game Database Full-Stack Web Application.**
