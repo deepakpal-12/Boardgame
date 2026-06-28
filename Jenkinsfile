@@ -1,67 +1,33 @@
 pipeline {
-    agent any
 
-    tools {
-        maven 'maven3.6'
+  agent any
+
+  tools {
+
+     maven 'maven3.6'
         jdk 'jdk17'
-    }
-
-    environment {
-        IMAGE_NAME = "deepakpal1208/myapp"
     }
 
     stages {
 
-        stage('Compile') {
+        stage('checkout') {
             steps {
-                sh 'mvn compile'
+                git branch: 'main', url: 'https://github.com/deepakpal-12/Boardgame.git'
             }
         }
 
-        stage('Test') {
+        stage('Build') {
             steps {
-                sh 'mvn test'
+               sh 'mvn clean verify'
             }
         }
-
-        stage('Package') {
+         stage('Sonar Scan') {
             steps {
-                sh 'mvn clean package'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'docker-id',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    '''
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
+   
 
-        stage('Push Docker Image') {
-            steps {
-                sh 'docker push $IMAGE_NAME:$BUILD_NUMBER'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo "Docker image pushed successfully: $IMAGE_NAME:$BUILD_NUMBER"
-        }
-    }
 }
