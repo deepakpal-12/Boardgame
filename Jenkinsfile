@@ -22,12 +22,20 @@ pipeline {
             }
         }
          stage('Sonar Scan') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
+             steps {
+        withSonarQubeEnv('SonarQube') {
+            withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
+                sh """
+                    mvn sonar:sonar \
+                      -Dsonar.projectKey=Board-game \
+                      -Dsonar.host.url=http://localhost:9000 \
+                      -Dsonar.login=$SONAR_TOKEN
+                """
+               }
+           }
         }
+   }
+
    
 
     }
